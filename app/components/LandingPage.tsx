@@ -29,7 +29,7 @@ export default function LandingPage() {
             setGameIdState(gameName);
         }
 
-        const priorName = cookies["hot-seat-cookie"];
+        const priorName = cookies["scattergories-cookie"];
         if (priorName) {
             hideModal(priorName, actionParam, gameName);
         } else {
