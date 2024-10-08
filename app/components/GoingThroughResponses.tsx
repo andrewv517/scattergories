@@ -35,10 +35,8 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     }
 
     useEffect(() => {
-        console.log(playerReading);
         if (playerReading && player.name === playerReading.name && game.responseIndex === -1 && playerReading.responses.length > 0) {
             // start from beginning
-            console.log("getting here");
             for (let i = 0; i < game.options.length; i++) {
                 if (playerReading.responses[i].value !== '') {
                     console.log(playerReading.responses[i].value, i);
@@ -52,6 +50,18 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
 
     if (game.responseIndex === -1) {
         return <p>Loading</p>
+    }
+
+    const deleteResponse = () => {
+        const responses = [...player.responses];
+        responses[game.responseIndex].value = '';
+
+        if (playerReading) {
+            const readingResponses = [...playerReading.responses];
+            readingResponses[game.responseIndex].value = '';
+            socket.emit('responses', { game, playerReading, readingResponses });
+        }
+        socket.emit('responses', { game, player, responses });
     }
 
     return (
@@ -103,6 +113,23 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                     >
                         Done reading
                     </button > : null
+            }
+            {
+                playerReading?.name !== player.name && player.responses[game.responseIndex]?.value !== '' ?
+                    <div className="flex flex-col justify-center items-center space-y-2">
+                        <p className="text-md text-gray-400 text-center">Your response for this category:</p>
+                        <div
+                            className="bg-slate-400 flex-grow font-semibold rounded-lg p-4 drop-shadow-xl text-slate-800 text-center m-auto w-full"
+                        >
+                            <p>{player.responses[game.responseIndex]?.value}</p>
+                        </div>
+                        <button
+                            className="bg-red-500 m-auto p-2 pl-3 pr-3 h-fit text-black font-semibold rounded-lg drop-shadow-xl"
+                            onClick={deleteResponse}
+                        >
+                            I wrote the same
+                        </button >
+                    </div> : null
             }
 
 

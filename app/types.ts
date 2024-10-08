@@ -27,6 +27,6 @@ export interface Game {
   receivedResponses: boolean,
 }
 
-export const API_URL = 'https://scattergoriesapi.andrewvadeika.com'
-// export const API_URL = 'http://localhost:8000';
+// export const API_URL = 'https://scattergoriesapi.andrewvadeika.com'
+export const API_URL = 'http://localhost:7000';
 export const COOKIE_NAME = 'scattergories-cookie';
