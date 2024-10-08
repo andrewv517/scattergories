@@ -1,6 +1,7 @@
 export interface PlayerResponse {
   value: string,
   downVoters: PlayerData[],
+  allowed: boolean,
 }
 
 export interface PlayerData {

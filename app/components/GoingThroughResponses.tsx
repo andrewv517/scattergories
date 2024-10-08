@@ -54,12 +54,12 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
 
     const deleteResponse = () => {
         const responses = [...player.responses];
-        responses[game.responseIndex].value = '';
+        responses[game.responseIndex].allowed = false;
 
         if (playerReading) {
             const readingResponses = [...playerReading.responses];
-            readingResponses[game.responseIndex].value = '';
-            socket.emit('responses', { game, playerReading, readingResponses });
+            readingResponses[game.responseIndex].allowed = false;
+            socket.emit('responses', { game, player: playerReading, responses: readingResponses });
         }
         socket.emit('responses', { game, player, responses });
     }
@@ -80,7 +80,7 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                     className="bg-slate-400 flex-grow font-semibold rounded-lg p-4 drop-shadow-xl text-slate-800 text-center m-auto"
                 >
                     <p className="font-bold underline">{game.options[game.responseIndex]}</p>
-                    <p className={(playerReading?.responses[game.responseIndex].downVoters.length ?? 0) > Math.floor(game.players.length / 2) ? 'line-through' : ''}>{playerReading?.responses[game.responseIndex]?.value}</p>
+                    <p className={(playerReading?.responses[game.responseIndex].downVoters.length ?? 0) > (game.players.length > 2 ? Math.floor(game.players.length / 2) : 0) || !playerReading?.responses[game.responseIndex].allowed ? 'line-through' : ''}>{playerReading?.responses[game.responseIndex]?.value}</p>
                 </div>
                 {
                     player.name === playerReading?.name ?
@@ -119,7 +119,8 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                     <div className="flex flex-col justify-center items-center space-y-2">
                         <p className="text-md text-gray-400 text-center">Your response for this category:</p>
                         <div
-                            className="bg-slate-400 flex-grow font-semibold rounded-lg p-4 drop-shadow-xl text-slate-800 text-center m-auto w-full"
+                            className={`bg-slate-400 flex-grow font-semibold rounded-lg p-4 drop-shadow-xl text-slate-800 text-center 
+                                m-auto w-full ${!player.responses[game.responseIndex].allowed ? 'line-through' : ''}`}
                         >
                             <p>{player.responses[game.responseIndex]?.value}</p>
                         </div>
