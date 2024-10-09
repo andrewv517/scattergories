@@ -1,17 +1,19 @@
 import { socket } from "../socket";
-import { COOKIE_NAME, Game, PlayerData } from "../types";
+import { Game, PlayerData } from "../types";
 import Lobby from "./Lobby";
 import ChoosingCard from "./ChoosingCard";
 import GoingThroughResponses from "./GoingThroughResponses";
 import Results from "./Results";
-import { useCookies } from "react-cookie";
 
 export default function GameScreen({ game, player }: { game: Game, player: PlayerData }) {
-    const [cookies, setCookie, removeCookie] = useCookies([COOKIE_NAME]);
+
+    const writingResponses = game.seconds > 0;
+    const showingResponses = game.playerReadingIndex !== -1;
+
     function renderScreen() {
-        if (!game.receivedResponses) {
+        if (writingResponses) {
             return <ChoosingCard game={game} player={player} />
-        } else if (game.readingCards) {
+        } else if (showingResponses) {
             return <GoingThroughResponses game={game} player={player} />
         }
         return <Results game={game} player={player} />;

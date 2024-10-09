@@ -1,7 +1,8 @@
 export interface PlayerResponse {
   value: string,
   downVoters: PlayerData[],
-  allowed: boolean,
+  upVoters: PlayerData[],
+  wroteSame: PlayerData[],
 }
 
 export interface PlayerData {
@@ -17,17 +18,15 @@ export interface Game {
   players: PlayerData[],
   host: PlayerData,
   responseIndex: number,
-  readingCards: boolean,
-  started: boolean,
   seconds: number,
   letter: string,
   options: string[],
   deny: Set<string>,
+  playerReadingIndex: number,
+  started: boolean,
   choseLetter: boolean,
-  playerReading: PlayerData,
-  receivedResponses: boolean,
 }
 
 export const API_URL = 'https://scattergoriesapi.andrewvadeika.com'
-// export const API_URL = 'http://localhost:7000';
+// export const API_URL = 'http://192.168.1.132:7000';
 export const COOKIE_NAME = 'scattergories-cookie';

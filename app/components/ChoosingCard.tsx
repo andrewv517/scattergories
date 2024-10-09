@@ -3,7 +3,7 @@ import { socket } from "../socket";
 import { Game, PlayerData, PlayerResponse } from "../types";
 
 export default function ChoosingCard({ game, player }: { game: Game, player: PlayerData }) {
-    const [responses, setResponses] = useState<PlayerResponse[]>(Array.from({length: game.options.length}, () => ({value: '', downVoters: [], allowed: true})));
+    const [responses, setResponses] = useState<PlayerResponse[]>(Array.from({length: game.options.length}, () => ({value: '', downVoters: [], upVoters: [player], wroteSame: []})));
 
     const isHost = () => {
         return game.host.name === player.name;
@@ -22,7 +22,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
     }
 
     useEffect(() => {
-        if (game.seconds <= 0) {
+        if (game.seconds === 1) {
             socket.emit('responses', { game, player, responses })
         }
     }, [game.seconds])
