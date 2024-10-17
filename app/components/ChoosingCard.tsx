@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { socket } from "../socket";
-import { Game, PlayerData, PlayerResponse } from "../types";
+import { headers, socket } from "../socket";
+import { API_URL, Game, PlayerData, PlayerResponse } from "../types";
 
 export default function ChoosingCard({ game, player }: { game: Game, player: PlayerData }) {
-    const [responses, setResponses] = useState<PlayerResponse[]>(Array.from({length: game.options.length}, () => ({value: '', downVoters: [], upVoters: [player], wroteSame: []})));
+    const [responses, setResponses] = useState<PlayerResponse[]>(Array.from({length: game.options.length}, () => ({value: '', downVoters: [], upVoters: [player.name], wroteSame: []})));
 
     const isHost = () => {
         return game.host.name === player.name;
@@ -21,11 +21,48 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
         setResponses(newResponses);
     }
 
+    async function getLetter() {
+        await fetch(`${API_URL}/getLetter`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                gameName: game.id,
+                playerName: player.name,
+                responses,
+                socketId: socket.id,
+            }),
+        })
+    }
+
+    async function choseLetter() {
+        await fetch(`${API_URL}/choseLetter`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                gameName: game.id,
+                socketId: socket.id,
+            }),
+        })
+    }
+
     useEffect(() => {
-        if (game.seconds === 1) {
-            socket.emit('responses', { game, player, responses })
+        if (game.seconds === 0) {
+            fetch(`${API_URL}/responses`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    gameName: game.id,
+                    playerName: player.name,
+                    responses,
+                    socketId: socket.id,
+                }),
+            })
         }
     }, [game.seconds])
+
+    if (game.seconds === 0) {
+        return <p>Submitting...</p>
+    }
 
     return (
         <div className="flex flex-col justify-center items-center space-y-3 text-white">
@@ -35,7 +72,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
                         <p className="text-3xl">Letter: {game.letter}</p>
                         {
                            (isHost() && !game.choseLetter) ?
-                                <button className="bg-slate-900 p-1 rounded-md" onClick={() => socket.emit('getLetter', { game })}>
+                                <button className="bg-slate-900 p-1 rounded-md" onClick={getLetter}>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                     </svg>
@@ -44,7 +81,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
                     </div>
                     {
                         (isHost() && !game.choseLetter) ? 
-                        <button className="bg-green-500 text-white m-auto w-fit font-semibold py-2 px-4 drop-shadow-xl rounded-lg" onClick={() => socket.emit('choseLetter', { game })}>Start Round</button> : null
+                        <button className="bg-green-500 text-white m-auto w-fit font-semibold py-2 px-4 drop-shadow-xl rounded-lg" onClick={choseLetter}>Start Round</button> : null
                     }
                     
                 </div>
@@ -69,7 +106,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
                                 <td className="border-b border-slate-700 px-2 py-1 font-medium">{option}</td>
                                 <td className="border-b border-slate-700 px-2 py-1">
                                     <input type="text"
-                                        className="bg-transparent border-red-950 border rounded-md px-1 font-semibold text-slate-800 placeholder-opacity-30 placeholder-slate-800 focus:ring-blue-500 
+                                        className="bg-transparent border-red-950 border rounded-md px-1 font-semibold text-white placeholder-opacity-30 placeholder-slate-800 focus:ring-blue-500 
                                     focus:border-blue-500" placeholder="Empty"
                                     onChange={(e) => handleResponseUpdate(index, e.target.value)}
                                         disabled={!game.choseLetter || game.seconds <= 0}

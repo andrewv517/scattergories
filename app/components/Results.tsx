@@ -1,9 +1,20 @@
-import { socket } from "../socket";
-import { Game, PlayerData } from "../types";
+import { socket, headers } from "../socket";
+import { API_URL, Game, PlayerData } from "../types";
 
 export default function Results({ game, player }: { game: Game, player: PlayerData }) {
     const isHost = () => {
         return game.host.name === player.name;
+    }
+
+    function nextRound() {
+        fetch(`${API_URL}/nextRound`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                gameName: game.id,
+            }),
+        })
     }
 
     return (
@@ -33,7 +44,7 @@ export default function Results({ game, player }: { game: Game, player: PlayerDa
                 isHost() ?
                     <button
                         className="bg-green-500 text-white w-fit font-semibold py-2 px-4 drop-shadow-xl rounded-lg"
-                        onClick={() => socket.emit('nextRound', { game })}
+                        onClick={nextRound}
                     >
                         Next round
                     </button> : null

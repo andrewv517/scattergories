@@ -1,8 +1,8 @@
 export interface PlayerResponse {
   value: string,
-  downVoters: PlayerData[],
-  upVoters: PlayerData[],
-  wroteSame: PlayerData[],
+  downVoters: string[],
+  upVoters: string[],
+  wroteSame: string[],
 }
 
 export interface PlayerData {

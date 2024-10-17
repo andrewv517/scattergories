@@ -5,7 +5,7 @@ import Modal from "./components/Modal";
 import LandingPage from "./components/LandingPage";
 import { API_URL, COOKIE_NAME, Game, PlayerData } from "./types";
 import GameScreen from "./components/GameScreen";
-import { socket } from "./socket";
+import { headers, socket } from "./socket";
 import { useCookies } from "react-cookie";
 
 
@@ -19,6 +19,15 @@ export default function Home() {
     socket.on('player', (playerData: PlayerData) => {
       setPlayer(playerData);
     })
+    socket.on("disconnect", (reason, details) => {
+      console.log(reason); // "transport error"
+
+      if (details) {
+        // in that case, details is an error object
+        console.log(JSON.stringify(details)); "xhr post error"
+      } 
+
+    });
 
     const returnToGame = async () => {
       const oldName = cookies["scattergories-cookie"];
@@ -27,7 +36,14 @@ export default function Home() {
         const res = await fetch(`${API_URL}/game?name=${oldName}`);
         const json: { game: Game | undefined, player: PlayerData | null } = await res.json();
         if (json.game && json.player) {
-          socket.emit('rejoin', { game: json.game });
+          await fetch(`${API_URL}/rejoin`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                gameName: json.game.id,
+            })
+        })
           setGame(json.game);
           setPlayer(json.player);
         } else {

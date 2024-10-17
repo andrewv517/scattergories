@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { API_URL, COOKIE_NAME, Game } from "../types"
 import Modal from "./Modal";
-import { socket } from "../socket";
+import { headers, socket } from "../socket";
 import { cookies } from "next/headers";
 import { useCookies } from "react-cookie";
 
@@ -47,13 +47,28 @@ export default function LandingPage() {
         }
     }
 
-    const handleJoinGame = (name: string, gameName: string) => {
-        socket.emit('joinGame', { name, gameName })
+    const handleJoinGame = async (name: string, gameName: string) => {
+        await fetch(`${API_URL}/joinGame`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                name,
+                gameName,
+            })
+        })
         setCookie(COOKIE_NAME, name);
     }
 
-    const handleCreateGame = (name: string) => {
-        socket.emit('createGame', { name })
+    const handleCreateGame = async (name: string) => {
+        await fetch(`${API_URL}/createGame`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                name,
+            })
+        })
         setShowingModal(false);
         setCookie(COOKIE_NAME, name);
     }
@@ -69,7 +84,7 @@ export default function LandingPage() {
                     games.length > 0 ?
                         <div>
                             {
-                                games.map((game, index) => (
+                                games.filter(({started}) => !started).map((game, index) => (
                                     <div
                                         key={index}
                                         className="bg-slate-400 font-semibold rounded-lg p-2 drop-shadow-xl text-slate-800 flex flex-row justify-between items-center my-4"

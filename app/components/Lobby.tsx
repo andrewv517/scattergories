@@ -1,9 +1,28 @@
-import { socket } from "../socket";
-import { Game, PlayerData } from "../types";
+import { socket, headers } from "../socket";
+import { API_URL, Game, PlayerData } from "../types";
 
 export default function Lobby({ game, player }: { game: Game, player: PlayerData }) {
-    const handleLeave = () => {
-        socket.emit('leave', { name: player.name, game });
+    const handleLeave = async () => {
+        await fetch(`${API_URL}/leave`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                gameName: game.id,
+                name: player.name,
+            }),
+        })
+    }
+
+    const handleStart = async () => {
+        await fetch(`${API_URL}/start`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                gameName: game.id,
+            }),
+        })
     }
 
     const isHost = (p: PlayerData) => {
@@ -23,7 +42,7 @@ export default function Lobby({ game, player }: { game: Game, player: PlayerData
                     {
                         isHost(player) ? <button
                             className="p-2 pl-4 pr-4 rounded-xl drop-shadow-lg bg-green-500 font-semibold flex-1"
-                            onClick={() => socket.emit('start', { game })}
+                            onClick={handleStart}
                         >
                             Start Game
                         </button> : null

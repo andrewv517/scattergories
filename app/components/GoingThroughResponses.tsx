@@ -1,12 +1,5 @@
-import { useEffect, useMemo } from "react";
-import { socket } from "../socket";
-import { Game, PlayerData } from "../types";
-
-interface ResponseHelper {
-    category: string,
-    response: string,
-    index: number,
-}
+import { headers, socket } from "../socket";
+import { API_URL, Game, PlayerData } from "../types";
 
 export default function GoingThroughResponses({ game, player }: { game: Game, player: PlayerData }) {
 
@@ -20,17 +13,37 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     }
 
     const playerReading = game.players[game.playerReadingIndex];
+
+    console.log(playerReading, playerReading.responses, game.responseIndex)
+    if (!playerReading || !playerReading.responses[game.responseIndex]) {
+        return <p>Loading...</p>
+    }
+
     const everyoneVoted = playerReading.responses[game.responseIndex].downVoters.length + playerReading.responses[game.responseIndex].upVoters.length === game.players.length;
     const shownResponse = playerReading.responses[game.responseIndex];
     const deniedByVotes = everyoneVoted && shownResponse.downVoters.length > (game.players.length > 2 ? shownResponse.upVoters.length : 0);
     const deniedBySimilarity = shownResponse.wroteSame.length > 0;
-    const playerWatchingResponseDenied = player.responses[game.responseIndex].downVoters.length > (game.players.length > 2 ? player.responses[game.responseIndex].upVoters.length : 0);
+    const playerWatchingResponseWroteSame = shownResponse.wroteSame.indexOf(player.name) !== -1;
+    const alreadyRead = game.playerReadingIndex >= game.players.map(({name}) => name).indexOf(player.name); // this is so fucking bad
+    const playerWatchingResponseDenied = player.responses[game.responseIndex].downVoters.length > (game.players.length > 2 ? player.responses[game.responseIndex].upVoters.length : 0)
+        || playerWatchingResponseWroteSame;
     const showingLastResponse = getNextIndex() === -1;
+    const votedUp = shownResponse.upVoters.indexOf(player.name) !== -1;
+    const votedDown = shownResponse.downVoters.indexOf(player.name) !== -1;
+    const votedWroteSame = shownResponse.wroteSame.indexOf(player.name) !== -1;
 
     const handlePreviousIndex = () => {
         for (let i = game.responseIndex - 1; i >= 0; i--) {
             if (playerReading.responses[i].value !== '') {
-                socket.emit('changeResponseIndex', { index: i, game })
+                fetch(`${API_URL}/changeResponseIndex`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({
+                        socketId: socket.id,
+                        index: i,
+                        gameName: game.id,
+                    }),
+                })
                 return;
             }
         }
@@ -39,18 +52,67 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     const handleNextIndex = () => {
         for (let i = game.responseIndex + 1; i < game.options.length; i++) {
             if (playerReading.responses[i].value !== '') {
-                socket.emit('changeResponseIndex', { index: i, game })
+                fetch(`${API_URL}/changeResponseIndex`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({
+                        socketId: socket.id,
+                        index: i,
+                        gameName: game.id,
+                    }),
+                })
                 return;
             }
         }
-        socket.emit('doneReading', { game });
+        fetch(`${API_URL}/doneReading`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                gameName: game.id,
+            }),
+        })
+    }
+
+    function downVote() {
+        fetch(`${API_URL}/downVote`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                playerName: player.name,
+                gameName: game.id,
+            }),
+        })
+    }
+
+    function upVote() {
+        fetch(`${API_URL}/upVote`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                playerName: player.name,
+                gameName: game.id,
+            }),
+        })
+    }
+
+    function wroteSame() {
+        fetch(`${API_URL}/wroteSame`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                playerName: player.name,
+                gameName: game.id,
+            }),
+        })
     }
 
     if (game.responseIndex === -1) {
         return <p>Loading</p>
     }
-
-    console.log(game.responseIndex, playerReading);
 
     return (
         <div className="mt-3 space-y-3 flex flex-col justify-center items-center">
@@ -98,11 +160,24 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
 
                         </button> : null
                 }
-            </div >
+            </div>
             <div className="flex flex-col justify-center items-center space-y-2">
+                <div>
+                    <p className="text-red-400 font-semibold text-lg">
+                        {
+                            shownResponse.wroteSame.length > 0 ? shownResponse.wroteSame.join(", ") + ' wrote the same!' : null
+                        }
+                    </p>
+                </div>
+                {
+                    playerReading.name !== player.name && (votedUp || votedDown) && !deniedBySimilarity ?
+                        <p className="font-semibold text-white text-lg">
+                            You voted <span className={`${votedUp ? 'text-green-600' : 'text-red-600'} font-semibold`}>{votedUp ? 'up' : 'down'}</span>
+                        </p> : null
+                }
                 <div className="flex flex-row items-center justify-center space-x-2">
-                    <div className="bg-red-600 rounded-lg px-2 py-1">
-                        <button className="text-center" onClick={() => socket.emit('downvote', { player, game })} disabled={player.name === playerReading.name}>
+                    <div className={`${votedDown ? 'bg-red-700' : 'bg-red-600'} rounded-lg px-2 py-1`}>
+                        <button className="text-center" onClick={downVote} disabled={player.name === playerReading.name || playerWatchingResponseWroteSame}>
                             👎
                         </button>
                     </div>
@@ -111,8 +186,8 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                     </p>
                 </div>
                 <div className="flex flex-row items-center justify-center space-x-2">
-                    <div className="bg-green-600 rounded-lg px-2 py-1">
-                        <button className="text-center" onClick={() => socket.emit('upvote', { player, game })} disabled={player.name === playerReading.name}>
+                    <div className={`${votedUp ? 'bg-green-700' : 'bg-green-600'} rounded-lg px-2 py-1`}>
+                        <button className="text-center" onClick={upVote} disabled={player.name === playerReading.name || playerWatchingResponseWroteSame}>
                             👍
                         </button>
                     </div>
@@ -134,9 +209,9 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                         {
                             player.responses[game.responseIndex]?.value !== '' ?
                                 <button
-                                    className="bg-red-500 m-auto p-2 pl-3 pr-3 h-fit text-black font-semibold rounded-lg drop-shadow-xl"
-                                    disabled={player.responses[game.responseIndex]?.value === ''}
-                                    onClick={() => socket.emit('wroteSame', { player, game })}
+                                    className={`${votedWroteSame ? 'bg-red-700' : 'bg-red-600'} m-auto p-2 pl-3 pr-3 h-fit text-black font-semibold rounded-lg drop-shadow-xl`}
+                                    disabled={player.responses[game.responseIndex]?.value === '' || (playerWatchingResponseWroteSame && alreadyRead)}
+                                    onClick={wroteSame}
                                 >
                                     I wrote the same
                                 </button > : null
