@@ -55,6 +55,12 @@ export default function Home() {
       setLoading(false);
     }
 
+    socket.on("connect", () => {
+      if (!game && !player) {
+        returnToGame();
+      }
+    })
+
     socket.on('gameState', ({ game }: { game: Game | undefined }) => {
       setGame(game);
       if (game) {
@@ -63,7 +69,6 @@ export default function Home() {
       }
     });
 
-    returnToGame();
   }, []);
 
 
