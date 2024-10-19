@@ -255,6 +255,7 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                     allowExpandReactions={false}
                     reactions={REACTION_EMOJI_IDS}
                     onReactionClick={handleReaction}
+                    lazyLoadEmojis={true}
                 />
             </div>
 
