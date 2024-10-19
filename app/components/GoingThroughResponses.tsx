@@ -66,15 +66,7 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     }
 
     const handleReaction = (reaction: EmojiClickData) => {
-        fetch(`${API_URL}/reaction`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({
-                socketId: socket.id,
-                gameName: game.id,
-                emojiId: reaction.emoji,
-            }),
-        })
+        socket.emit('reactionMade', { emojiId: reaction.emoji, gameName: game.id })
     }
 
     const handleNextIndex = () => {
