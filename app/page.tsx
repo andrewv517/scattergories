@@ -25,7 +25,7 @@ export default function Home() {
       if (details) {
         // in that case, details is an error object
         console.log(JSON.stringify(details)); "xhr post error"
-      } 
+      }
 
     });
 
@@ -40,10 +40,10 @@ export default function Home() {
             method: "POST",
             headers,
             body: JSON.stringify({
-                socketId: socket.id,
-                gameName: json.game.id,
+              socketId: socket.id,
+              gameName: json.game.id,
             })
-        })
+          })
           setGame(json.game);
           setPlayer(json.player);
         } else {
@@ -55,11 +55,16 @@ export default function Home() {
       setLoading(false);
     }
 
-    socket.on("connect", () => {
-      if (!game && !player) {
-        returnToGame();
-      }
-    })
+    if (socket.connected && !game && !player) {
+      returnToGame();
+    } else if (!socket.hasListeners("connect")) {
+      socket.on("connect", () => {
+        if (!game && !player) {
+          returnToGame();
+        }
+      })
+    }
+
 
     socket.on('gameState', ({ game }: { game: Game | undefined }) => {
       setGame(game);

@@ -1,7 +1,24 @@
+import { MouseDownEvent } from "emoji-picker-react/dist/config/config";
 import { headers, socket } from "../socket";
 import { API_URL, Game, PlayerData } from "../types";
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import { useEffect, useState } from "react";
+import FlyingEmoji from "./FlyingEmoji";
+
+const REACTION_EMOJI_IDS = [
+    '1f602',
+    '1f971',
+    '1f621',
+    '1f480',
+    '1f44d',
+    '1f44e',
+    '1f4a9',
+    '1f632',
+]
 
 export default function GoingThroughResponses({ game, player }: { game: Game, player: PlayerData }) {
+    const [flyingEmojis, setFlyingEmojis] = useState<React.JSX.Element[]>([]);
+    const [onTimeout, setOnTimeout] = useState(false);
 
     const getNextIndex = () => {
         for (let i = game.responseIndex + 1; i < game.options.length; i++) {
@@ -14,7 +31,6 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
 
     const playerReading = game.players[game.playerReadingIndex];
 
-    console.log(playerReading, playerReading.responses, game.responseIndex)
     if (!playerReading || !playerReading.responses[game.responseIndex]) {
         return <p>Loading...</p>
     }
@@ -24,7 +40,7 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     const deniedByVotes = everyoneVoted && shownResponse.downVoters.length > (game.players.length > 2 ? shownResponse.upVoters.length : 0);
     const deniedBySimilarity = shownResponse.wroteSame.length > 0;
     const playerWatchingResponseWroteSame = shownResponse.wroteSame.indexOf(player.name) !== -1;
-    const alreadyRead = game.playerReadingIndex >= game.players.map(({name}) => name).indexOf(player.name); // this is so fucking bad
+    const alreadyRead = game.playerReadingIndex >= game.players.map(({ name }) => name).indexOf(player.name); // this is so fucking bad
     const playerWatchingResponseDenied = player.responses[game.responseIndex].downVoters.length > (game.players.length > 2 ? player.responses[game.responseIndex].upVoters.length : 0)
         || playerWatchingResponseWroteSame;
     const showingLastResponse = getNextIndex() === -1;
@@ -47,6 +63,18 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                 return;
             }
         }
+    }
+
+    const handleReaction = (reaction: EmojiClickData) => {
+        fetch(`${API_URL}/reaction`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                socketId: socket.id,
+                gameName: game.id,
+                emojiId: reaction.emoji,
+            }),
+        })
     }
 
     const handleNextIndex = () => {
@@ -109,6 +137,14 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
             }),
         })
     }
+
+    useEffect(() => {
+        if (!socket.hasListeners('reaction')) {
+            socket.on('reaction', (({ emojiId }: { emojiId: string }) => {
+                setFlyingEmojis(currentFlyingEmojis => [...currentFlyingEmojis, <FlyingEmoji emoji={emojiId} duration={2500} key={currentFlyingEmojis.length + 1} />])
+            }));
+        }
+    }, [])
 
     if (game.responseIndex === -1) {
         return <p>Loading</p>
@@ -218,7 +254,17 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
                         }
                     </div> : null
             }
-
+            <div>
+                {flyingEmojis}
+            </div>
+            <div className="fixed bottom-2">
+                <EmojiPicker
+                    reactionsDefaultOpen={true}
+                    allowExpandReactions={false}
+                    reactions={REACTION_EMOJI_IDS}
+                    onReactionClick={handleReaction}
+                />
+            </div>
 
         </div>
     )

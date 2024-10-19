@@ -25,3 +25,24 @@ body {
     text-wrap: balance;
   }
 }
+
+@keyframes flyUpAndWiggle {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-80vh); /* Final wiggle off to the right */
+    opacity: 0;
+  }
+}
+
+@keyframes wiggle {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+
