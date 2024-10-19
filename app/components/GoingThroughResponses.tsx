@@ -7,13 +7,12 @@ import FlyingEmoji from "./FlyingEmoji";
 
 const REACTION_EMOJI_IDS = [
     '1f602',
-    '1f971',
     '1f621',
     '1f480',
+    '2754',
     '1f44d',
     '1f44e',
     '1f4a9',
-    '1f632',
 ]
 
 export default function GoingThroughResponses({ game, player }: { game: Game, player: PlayerData }) {
