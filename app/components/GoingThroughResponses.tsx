@@ -1,4 +1,3 @@
-import { MouseDownEvent } from "emoji-picker-react/dist/config/config";
 import { headers, socket } from "../socket";
 import { API_URL, Game, PlayerData } from "../types";
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
@@ -17,7 +16,6 @@ const REACTION_EMOJI_IDS = [
 
 export default function GoingThroughResponses({ game, player }: { game: Game, player: PlayerData }) {
     const [flyingEmojis, setFlyingEmojis] = useState<React.JSX.Element[]>([]);
-    const [onTimeout, setOnTimeout] = useState(false);
 
     const getNextIndex = () => {
         for (let i = game.responseIndex + 1; i < game.options.length; i++) {
@@ -29,6 +27,20 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     }
 
     const playerReading = game.players[game.playerReadingIndex];
+
+    useEffect(() => {
+        if (!socket.hasListeners('reaction')) {
+            socket.on('reaction', (({ emojiId }: { emojiId: string }) => {
+                setFlyingEmojis(currentFlyingEmojis => [...currentFlyingEmojis, <FlyingEmoji emoji={emojiId}
+                                                                                             duration={2500}
+                                                                                             key={`${socket.id}_${emojiId}_${currentFlyingEmojis.length}`} />])
+            }));
+        }
+
+        return () => {
+            socket.off('reaction');
+        }
+    }, [])
 
     if (!playerReading || !playerReading.responses[game.responseIndex]) {
         return <p>Loading...</p>
@@ -129,26 +141,18 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
         })
     }
 
-    useEffect(() => {
-        if (!socket.hasListeners('reaction')) {
-            socket.on('reaction', (({ emojiId }: { emojiId: string }) => {
-                setFlyingEmojis(currentFlyingEmojis => [...currentFlyingEmojis, <FlyingEmoji emoji={emojiId} duration={2500} key={currentFlyingEmojis.length + 1} />])
-            }));
-        }
-    }, [])
-
     if (game.responseIndex === -1) {
         return <p>Loading</p>
     }
 
     return (
         <div className="mt-3 space-y-3 flex flex-col justify-center items-center">
-            <p className="text-2xl text-white">{playerReading.name}'s responses ({playerReading.responses.filter(r => r.value !== '').length})</p>
+            <p className="text-2xl text-white">{playerReading.name}&#39;s responses ({playerReading.responses.filter(r => r.value !== '').length})</p>
             {
                 playerReading.name === player.name ? <p
                     className="text-md text-gray-400 text-center"
                 >
-                    It's your job to scroll through and read them!
+                    It&#39;s your job to scroll through and read them!
                 </p> : null
             }
             <div className="flex justify-between items-center w-full space-x-2">
