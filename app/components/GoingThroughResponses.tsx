@@ -46,7 +46,7 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
         return <p>Loading...</p>
     }
 
-    const everyoneVoted = playerReading.responses[game.responseIndex].downVoters.length + playerReading.responses[game.responseIndex].upVoters.length === game.players.length;
+    const everyoneVoted = playerReading.responses[game.responseIndex].downVoters.length + playerReading.responses[game.responseIndex].upVoters.length >= Math.round(game.players.length / 2);
     const shownResponse = playerReading.responses[game.responseIndex];
     const deniedByVotes = everyoneVoted && shownResponse.downVoters.length > (game.players.length > 2 ? shownResponse.upVoters.length : 0);
     const deniedBySimilarity = shownResponse.wroteSame.length > 0;
