@@ -27,5 +27,5 @@ export interface Game {
   choseLetter: boolean,
 }
 
-export const API_URL = process.env.NODE_ENV === 'development' ? 'http://192.168.1.132:7000' : 'https://scattergoriesapi.andrewvadeika.com'
+export const API_URL = process.env.NODE_ENV === 'development' ? 'http://192.168.1.132:7000' : 'https://scattergories-server-iwu3.onrender.com'
 export const COOKIE_NAME = 'scattergories-cookie';
