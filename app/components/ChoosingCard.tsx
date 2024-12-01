@@ -58,7 +58,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
                 }),
             })
         }
-    }, [game.seconds])
+    }, [game.id, game.seconds, player.name, responses])
 
     if (game.seconds === 0) {
         return <p>Submitting...</p>
@@ -80,13 +80,13 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
                         }
                     </div>
                     {
-                        (isHost() && !game.choseLetter) ? 
+                        (isHost() && !game.choseLetter) ?
                         <button className="bg-green-500 text-white m-auto w-fit font-semibold py-2 px-4 drop-shadow-xl rounded-lg" onClick={choseLetter}>Start Round</button> : null
                     }
-                    
+
                 </div>
                 {
-                    game.choseLetter ? 
+                    game.choseLetter ?
                     <p className="text-lg">Time left: {formatTime()}</p> : null
                 }
             </div>
@@ -106,7 +106,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
                                 <td className="border-b border-slate-700 px-2 py-1 font-medium">{option}</td>
                                 <td className="border-b border-slate-700 px-2 py-1">
                                     <input type="text"
-                                        className="bg-transparent border-red-950 border rounded-md px-1 font-semibold text-white placeholder-opacity-30 placeholder-slate-800 focus:ring-blue-500 
+                                        className="bg-transparent border-red-950 border rounded-md px-1 font-semibold text-white placeholder-opacity-30 placeholder-slate-800 focus:ring-blue-500
                                     focus:border-blue-500" placeholder="Empty"
                                     onChange={(e) => handleResponseUpdate(index, e.target.value)}
                                         disabled={!game.choseLetter || game.seconds <= 0}

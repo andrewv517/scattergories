@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Modal from "./components/Modal";
 import LandingPage from "./components/LandingPage";
 import { API_URL, COOKIE_NAME, Game, PlayerData } from "./types";
 import GameScreen from "./components/GameScreen";
@@ -12,7 +11,7 @@ import { useCookies } from "react-cookie";
 export default function Home() {
   const [game, setGame] = useState<Game | undefined>();
   const [player, setPlayer] = useState<PlayerData | undefined>()
-  const [cookies, setCookie, removeCookie] = useCookies([COOKIE_NAME]);
+  const [cookies, , removeCookie] = useCookies([COOKIE_NAME]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +23,7 @@ export default function Home() {
 
       if (details) {
         // in that case, details is an error object
-        console.log(JSON.stringify(details)); "xhr post error"
+        console.log(JSON.stringify(details));
       }
 
     });
@@ -74,7 +73,7 @@ export default function Home() {
       }
     });
 
-  }, []);
+  }, [cookies, game, player, removeCookie]);
 
 
   if (loading) {

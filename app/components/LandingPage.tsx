@@ -2,12 +2,11 @@ import { useEffect, useState } from "react"
 import { API_URL, COOKIE_NAME, Game } from "../types"
 import Modal from "./Modal";
 import { headers, socket } from "../socket";
-import { cookies } from "next/headers";
 import { useCookies } from "react-cookie";
 
 export default function LandingPage() {
     const [games, setGames] = useState<Game[]>([])
-    const [cookies, setCookie, removeCookie] = useCookies([COOKIE_NAME]);
+    const [cookies, setCookie] = useCookies([COOKIE_NAME]);
     const [showingModal, setShowingModal] = useState(false);
     const [actionState, setActionState] = useState('');
     const [gameIdState, setGameIdState] = useState('');
