@@ -47,7 +47,7 @@ export default function GameScreen({ game, player }: { game: Game, player: Playe
         <div>
             <div className="flex justify-between items-center">
                 {
-                    game.started ? <button
+                    game.started && game.joinable ? <button
                         className="m-3 px-2 rounded-xl drop-shadow-lg bg-red-500 font-semibold"
                         onClick={handleLeaveGame}>Leave
                     </button> : <div></div>
