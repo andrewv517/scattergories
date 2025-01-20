@@ -1,5 +1,6 @@
 import { socket, headers } from "../socket";
 import { API_URL, Game, PlayerData } from "../types";
+import Image from "next/image";
 
 export default function Lobby({ game, player }: { game: Game, player: PlayerData }) {
     const handleLeave = async () => {
@@ -31,6 +32,10 @@ export default function Lobby({ game, player }: { game: Game, player: PlayerData
 
     return (
         <div className="w-full">
+            <header className="flex justify-center items-center space-x-2 mt-6">
+                <Image src="dice.png" width={64} height={64} alt="cards"/>
+                <h1 className="text-5xl text-amber-50 font-semibold">Scattergories</h1>
+            </header>
             <div className="w:5/6 sm:w-2/3 md:w-1/3 m-auto p-6">
                 <div className="flex flex-row justify-between items-center space-x-4">
                     <button
@@ -58,7 +63,8 @@ export default function Lobby({ game, player }: { game: Game, player: PlayerData
                                 className="player bg-slate-400 font-semibold rounded-lg p-2 drop-shadow-xl text-slate-800 flex flex-row items-center justify-between"
                                 key={index}
                             >
-                                <span className={gamePlayer.socketId === player.socketId ? 'text-green-900' : ''}>{gamePlayer.name}</span>
+                                <span
+                                    className={gamePlayer.socketId === player.socketId ? 'text-green-900' : ''}>{gamePlayer.name}</span>
                                 {
                                     isHost(gamePlayer) ? <span>👑</span> : null
                                 }

@@ -65,7 +65,7 @@ export default function ChoosingCard({ game, player }: { game: Game, player: Pla
     }
 
     return (
-        <div className="flex flex-col justify-center items-center space-y-3 text-white">
+        <div className="flex flex-col justify-center items-center space-y-3 text-white px-2">
             <div>
                 <div className="flex flex-col justify-center items-center space-y-4">
                     <div className="flex flex-row items-center justify-center space-x-4">

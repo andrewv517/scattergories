@@ -45,21 +45,26 @@ export default function GameScreen({ game, player }: { game: Game, player: Playe
 
     return (
         <div>
-            {
-                game.host.name === player.name ?
-                    <button
-                        className="absolute top-0 right-0 m-3 px-2 rounded-xl drop-shadow-lg bg-red-500 font-semibold"
-                        onClick={handleEndGame}>X</button>
-                    : null
-            }
-            <button className="absolute top-0 left-0 m-3 px-2 rounded-xl drop-shadow-lg bg-red-500 font-semibold"
-                    onClick={handleLeaveGame}>Leave
-            </button>
+            <div className="flex justify-between items-center">
+                {
+                    game.started ? <button
+                        className="m-3 px-2 rounded-xl drop-shadow-lg bg-red-500 font-semibold"
+                        onClick={handleLeaveGame}>Leave
+                    </button> : <div></div>
+                }
+                {
+                    game.host.name === player.name ?
+                        <button
+                            className="m-3 px-2 rounded-xl drop-shadow-lg bg-red-500 font-semibold"
+                            onClick={handleEndGame}>X</button>
+                        : null
+                }
+            </div>
             {
                 game.started ?
                     <div className="flex justify-center items-center flex-col mx-auto mt-5 w-full">
 
-                        {
+                    {
                             renderScreen()
                         }
 
