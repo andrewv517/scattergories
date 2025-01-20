@@ -30,10 +30,12 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
 
     useEffect(() => {
         if (!socket.hasListeners('reaction')) {
-            socket.on('reaction', (({ emojiId }: { emojiId: string }) => {
-                setFlyingEmojis(currentFlyingEmojis => [...currentFlyingEmojis, <FlyingEmoji emoji={emojiId}
-                                                                                             duration={2500}
-                                                                                             key={`${socket.id}_${emojiId}_${currentFlyingEmojis.length}`} />])
+            socket.on('reaction', (({ emojiId }: { emojiId: number }) => {
+                if (emojiId < 0 || emojiId >= REACTION_EMOJI_IDS.length) {
+                    return;
+                }
+                setFlyingEmojis(currentFlyingEmojis => [...currentFlyingEmojis, <FlyingEmoji emoji={REACTION_EMOJI_IDS[emojiId]}
+                                                                                             duration={2500} key={`${socket.id}_${emojiId}_${currentFlyingEmojis.length}`} />])
             }));
         }
 
@@ -77,7 +79,7 @@ export default function GoingThroughResponses({ game, player }: { game: Game, pl
     }
 
     const handleReaction = (reaction: EmojiClickData) => {
-        socket.emit('reactionMade', { emojiId: reaction.emoji, gameName: game.id })
+        socket.emit('reactionMade', { emojiId: REACTION_EMOJI_IDS.indexOf(reaction.unified), gameName: game.id })
     }
 
     const handleNextIndex = () => {

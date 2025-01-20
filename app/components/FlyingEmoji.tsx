@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import {Emoji} from "emoji-picker-react";
 
 interface FlyingEmojiProps {
   emoji: string;
@@ -34,7 +35,7 @@ const FlyingEmoji = ({ emoji, duration = 3000 }: FlyingEmojiProps) => {
         fontSize: '2rem',
       }}
     >
-      {emoji}
+        <Emoji unified={emoji} />
     </span>
   );
 };
