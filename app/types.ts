@@ -24,6 +24,7 @@ export interface Game {
   deny: Set<string>,
   playerReadingIndex: number,
   started: boolean,
+  joinable: boolean,
   choseLetter: boolean,
 }
 
